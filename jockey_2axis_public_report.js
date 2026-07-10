@@ -16,7 +16,14 @@
   const hideTip = () => { if (tip) tip.hidden = true; };
   function showTip(event, point) {
     if (!tip || point.classList.contains('hidden')) return;
-    tip.innerHTML = `<b>${point.dataset.name}</b><br>Rides: ${point.dataset.ride}<br>Forward: ${point.dataset.forward}<br>Push: ${point.dataset.push}<br>Latest: ${point.dataset.date || '-'}`;
+    tip.innerHTML = `<b>${point.dataset.name}</b>` +
+      `<span>${point.dataset.quad || ''}</span><br>` +
+      `騎乗数: ${point.dataset.ride || '-'}<br>` +
+      `前寄り軸: ${point.dataset.forward || '-'}<br>` +
+      `動き軸: ${point.dataset.push || '-'}<br>` +
+      `4角5番手以内率: ${point.dataset.front5 || '-'}<br>` +
+      `位置変化の目安: ${point.dataset.gain || '-'}<br>` +
+      `最新日: ${point.dataset.date || '-'}`;
     tip.hidden = false;
     const pad = 14, width = 290, height = 150;
     let x = event.clientX + pad, y = event.clientY + pad;
