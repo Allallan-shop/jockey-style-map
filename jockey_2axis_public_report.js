@@ -11,56 +11,69 @@
   const points = [...document.querySelectorAll('.point')];
   const cards = [...document.querySelectorAll('.rep-card')];
   const labels = [...document.querySelectorAll('.point-label')];
-  function norm(s){ return (s || '').toString().trim().toLowerCase(); }
-  function showTip(e, p){
-    if(!tip) return;
-    tip.innerHTML = `<b>${p.dataset.name}</b>${p.dataset.quad}<br>騎乗数: ${p.dataset.ride}<br>前寄り軸: ${p.dataset.forward}<br>動き軸: ${p.dataset.push}<br>4角5番手以内率: ${p.dataset.front5 || '-'}<br>位置変化の目安: ${p.dataset.gain || '-'}<br>最新日: ${p.dataset.date || '-'}`;
+  const norm = value => (value || '').toString().trim().toLowerCase();
+  const pointByName = new Map(points.map(point => [norm(point.dataset.name), point]));
+  const hideTip = () => { if (tip) tip.hidden = true; };
+  function showTip(event, point) {
+    if (!tip || point.classList.contains('hidden')) return;
+    tip.innerHTML = `<b>${point.dataset.name}</b><br>Rides: ${point.dataset.ride}<br>Forward: ${point.dataset.forward}<br>Push: ${point.dataset.push}<br>Latest: ${point.dataset.date || '-'}`;
     tip.hidden = false;
-    const pad = 14, w = 290, h = 150;
-    let x = e.clientX + pad, y = e.clientY + pad;
-    if(x + w > window.innerWidth) x = e.clientX - w - pad;
-    if(y + h > window.innerHeight) y = e.clientY - h - pad;
-    tip.style.left = `${Math.max(8, x)}px`; tip.style.top = `${Math.max(8, y)}px`;
+    const pad = 14, width = 290, height = 150;
+    let x = event.clientX + pad, y = event.clientY + pad;
+    if (x + width > window.innerWidth) x = event.clientX - width - pad;
+    if (y + height > window.innerHeight) y = event.clientY - height - pad;
+    tip.style.left = `${Math.max(8, x)}px`;
+    tip.style.top = `${Math.max(8, y)}px`;
   }
-  function hideTip(){ if(tip) tip.hidden = true; }
-  function apply(){
-    const q = norm(search && search.value);
-    const minRide = parseInt((rideNum && rideNum.value) || (ride && ride.value) || '0', 10);
-    let count = 0, anySearch = Boolean(q);
-    points.forEach(p => {
-      const name = norm(p.dataset.name);
-      const bySearch = !q || name.includes(q);
-      const byRide = parseInt(p.dataset.ride || '0', 10) >= minRide;
-      const byRecent = !recent || !recent.checked || ((p.dataset.date || '') >= cutoff);
-      const ok = bySearch && byRide && byRecent;
-      p.classList.toggle('hidden', !ok);
-      p.classList.toggle('dimmed', ok && anySearch && !bySearch);
-      p.classList.toggle('highlight', ok && anySearch && bySearch);
-      if(ok) count++;
-    });
-    labels.forEach(l => {
-      const name = norm(l.textContent);
-      const hit = !q || name.includes(q);
-      l.classList.toggle('dimmed', anySearch && !hit);
-    });
-    cards.forEach(c => {
-      const name = norm(c.dataset.name);
-      const ok = (!q || name.includes(q)) && parseInt(c.dataset.ride || '0', 10) >= minRide;
-      c.classList.toggle('hidden', !ok);
-    });
-    if(visible) visible.textContent = count;
-    if(noResult) noResult.hidden = count !== 0;
+  function stateFor(point, query, minimum, recentOnly) {
+    const bySearch = !query || norm(point.dataset.name).includes(query);
+    const byRide = Number(point.dataset.ride || 0) >= minimum;
+    const byRecent = !recentOnly || (point.dataset.date || '') >= cutoff;
+    return { bySearch, byRide, byRecent, ok: bySearch && byRide && byRecent };
   }
-  if(search) search.addEventListener('input', apply);
-  if(clear) clear.addEventListener('click', () => { search.value=''; apply(); search.focus(); });
-  if(ride) ride.addEventListener('input', () => { rideNum.value = ride.value; apply(); });
-  if(rideNum) rideNum.addEventListener('input', () => { if(ride) ride.value = rideNum.value; apply(); });
-  if(recent) recent.addEventListener('change', apply);
-  points.forEach(p => {
-    p.addEventListener('mousemove', e => showTip(e, p));
-    p.addEventListener('mouseenter', e => showTip(e, p));
-    p.addEventListener('mouseleave', hideTip);
-    p.addEventListener('click', e => showTip(e, p));
+  function apply() {
+    const query = norm(search && search.value);
+    const minimum = Number((rideNum && rideNum.value) || (ride && ride.value) || 0);
+    const recentOnly = Boolean(recent && recent.checked);
+    const states = new Map();
+    let count = 0;
+    points.forEach(point => {
+      const state = stateFor(point, query, minimum, recentOnly);
+      states.set(norm(point.dataset.name), state);
+      point.classList.toggle('hidden', !state.ok);
+      point.classList.toggle('highlight', state.ok && Boolean(query));
+      if (state.ok) count += 1;
+    });
+    labels.forEach(label => {
+      const state = states.get(norm(label.textContent));
+      label.classList.toggle('hidden', !state || !state.ok);
+    });
+    const unmatchedCards = [];
+    cards.forEach(card => {
+      const point = pointByName.get(norm(card.dataset.name));
+      if (!point) {
+        unmatchedCards.push(card.dataset.name || '(unnamed)');
+        card.classList.add('hidden');
+        return;
+      }
+      const state = states.get(norm(point.dataset.name));
+      card.classList.toggle('hidden', !state || !state.ok);
+    });
+    if (unmatchedCards.length) console.warn('Unmatched representative cards:', unmatchedCards);
+    if (visible) visible.textContent = count;
+    if (noResult) noResult.hidden = count !== 0;
+    if (count === 0) hideTip();
+  }
+  if (search) search.addEventListener('input', apply);
+  if (clear) clear.addEventListener('click', () => { search.value = ''; apply(); search.focus(); });
+  if (ride) ride.addEventListener('input', () => { if (rideNum) rideNum.value = ride.value; apply(); });
+  if (rideNum) rideNum.addEventListener('input', () => { if (ride) ride.value = rideNum.value; apply(); });
+  if (recent) recent.addEventListener('change', apply);
+  points.forEach(point => {
+    point.addEventListener('mousemove', event => showTip(event, point));
+    point.addEventListener('mouseenter', event => showTip(event, point));
+    point.addEventListener('mouseleave', hideTip);
+    point.addEventListener('click', event => showTip(event, point));
   });
   apply();
 })();
