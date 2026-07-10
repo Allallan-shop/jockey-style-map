@@ -1,1 +1,40 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>騎手位置取り傾向マップ</title><link rel="stylesheet" href="jockey_2axis_public_report.css"></head><body><main class="report"><header class="hero"><div><p class="kicker">index</p><h1>騎手の位置取り傾向マップ</h1><p class="subtitle">表示を選択</p></div></header><section class="definitions"><div class="def-grid"><div><b><a href="jockey_2axis_public_report_min100.html">min100 primary</a></b><span>公開用の主表示。</span></div><div><b><a href="jockey_2axis_public_report_min50.html">min50 exploratory</a></b><span>補助確認用。</span></div><div><b><a href="jockey_2axis_public_report_square.html">square SNS image</a></b><span>正方形プレビュー用。</span></div></div></section></main></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>騎手位置取り傾向マップ</title>
+  <link rel="stylesheet" href="jockey_2axis_public_report.css">
+</head>
+<body>
+<main class="report">
+  <header class="hero">
+    <div>
+      <p class="kicker">descriptive analytics / report mart P0</p>
+      <h1>騎手の位置取り傾向マップ</h1>
+      <p class="subtitle">過去騎乗から見る、位置取りと位置変化の相対傾向</p>
+    </div>
+  </header>
+
+  <section class="index-guide" aria-labelledby="indexGuideTitle">
+    <h2 id="indexGuideTitle">このマップの目的</h2>
+    <p>過去騎乗データから、騎手ごとの「普段どの位置で運びやすいか」と「レース中にどの程度位置を動かすか」を比較するためのマップです。1人の騎手を1つの点で表し、騎乗スタイルの違いを相対的に確認します。能力や騎乗の上手さを示すランキングではありません。</p>
+    <div class="guide-summary" aria-label="基本の読み方">
+      <div><b>上</b><span>前めの位置で運ぶ傾向</span></div>
+      <div><b>下</b><span>控えて後方から運ぶ傾向</span></div>
+      <div><b>右</b><span>位置を上げる・動かす傾向</span></div>
+      <div><b>左</b><span>溜めて待つ傾向</span></div>
+    </div>
+  </section>
+
+  <section class="definitions">
+    <h2>表示を選択</h2>
+    <div class="def-grid">
+      <div><b><a href="jockey_2axis_public_report_min100.html">min100 主表示</a></b><span>100騎乗以上の騎手を対象。標本数を優先して確認する基本表示です。</span></div>
+      <div><b><a href="jockey_2axis_public_report_min50.html">min50 補助表示</a></b><span>50騎乗以上の騎手を対象。対象は広がりますが、偶然の影響を受けやすくなります。</span></div>
+      <div><b><a href="jockey_2axis_public_report_square.html">正方形プレビュー</a></b><span>SNS画像や画面確認向けの簡易レイアウトです。</span></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
